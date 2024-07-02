@@ -30,12 +30,20 @@ vim.keymap.set("", "<Plug>(foldnav-previous)", function()
     local savedView = vim.fn.winsaveview()
     local savedPos = vim.fn.getcurpos()
     vim.cmd "keepjumps norm! zk"
-    local prev = vim.fn.line(".")
+    local prev = vim.fn.line "."
     vim.fn.setpos(".", savedPos)
     vim.fn.winrestview(savedView)
 
+    local visibleLine
+    local closedFoldStart = vim.fn.foldclosed "."
+    if closedFoldStart == -1 then
+      visibleLine = vim.fn.line "."
+    else
+      visibleLine = closedFoldStart
+    end
+
     local lastLevel = -1
-    for i = vim.fn.line(".") - 1, 1, -1 do
+    for i = visibleLine - 1, 1, -1 do
       local level = vim.fn.foldlevel(i)
       if level < lastLevel or (level == lastLevel and i == prev) then
         return i + 1
