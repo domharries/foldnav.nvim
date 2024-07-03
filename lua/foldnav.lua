@@ -1,4 +1,6 @@
-local function changeLineKeepCol(lineFn)
+local M = {}
+
+local function change_line_keep_col(lineFn)
   -- curswant is a virtual col
   local curswant = vim.fn.getcurpos()[5]
 
@@ -12,24 +14,24 @@ local function changeLineKeepCol(lineFn)
   vim.cmd "norm! m'" -- update jumplist
 end
 
-vim.keymap.set("", "<Plug>(foldnav-start)", function()
-  changeLineKeepCol(function() vim.cmd "keepjumps norm! [z" end)
-end)
+function M.to_start()
+  change_line_keep_col(function() vim.cmd "keepjumps norm! [z" end)
+end
 
-vim.keymap.set("", "<Plug>(foldnav-end)", function()
-  changeLineKeepCol(function() vim.cmd "keepjumps norm! ]z" end)
-end)
+function M.to_end()
+  change_line_keep_col(function() vim.cmd "keepjumps norm! ]z" end)
+end
 
-vim.keymap.set("", "<Plug>(foldnav-next)", function()
-  changeLineKeepCol(function() vim.cmd "keepjumps norm! zj" end)
-end)
+function M.to_next()
+  change_line_keep_col(function() vim.cmd "keepjumps norm! zj" end)
+end
 
-vim.keymap.set("", "<Plug>(foldnav-previous-end)", function()
-  changeLineKeepCol(function() vim.cmd "keepjumps norm! zk" end)
-end)
+function M.to_prev_end()
+  change_line_keep_col(function() vim.cmd "keepjumps norm! zk" end)
+end
 
-vim.keymap.set("", "<Plug>(foldnav-previous-start)", function()
-  changeLineKeepCol(function()
+function M.to_prev_start()
+  change_line_keep_col(function()
     -- Detect consecutive sibling folds
     local savedView = vim.fn.winsaveview()
     local savedPos = vim.fn.getcurpos()
@@ -39,6 +41,7 @@ vim.keymap.set("", "<Plug>(foldnav-previous-start)", function()
     vim.fn.winrestview(savedView)
 
     local visibleLine
+    ---@diagnostic disable-next-line: param-type-mismatch
     local closedFoldStart = vim.fn.foldclosed "."
     if closedFoldStart == -1 then
       visibleLine = vim.fn.line "."
@@ -56,4 +59,6 @@ vim.keymap.set("", "<Plug>(foldnav-previous-start)", function()
     end
     if vim.fn.foldlevel(1) > 0 then return 1 end
   end)
-end)
+end
+
+return M
