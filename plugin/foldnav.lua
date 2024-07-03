@@ -24,7 +24,11 @@ vim.keymap.set("", "<Plug>(foldnav-next)", function()
   changeLineKeepCol(function() vim.cmd "keepjumps norm! zj" end)
 end)
 
-vim.keymap.set("", "<Plug>(foldnav-previous)", function()
+vim.keymap.set("", "<Plug>(foldnav-previous-end)", function()
+  changeLineKeepCol(function() vim.cmd "keepjumps norm! zk" end)
+end)
+
+vim.keymap.set("", "<Plug>(foldnav-previous-start)", function()
   changeLineKeepCol(function()
     -- Detect consecutive sibling folds
     local savedView = vim.fn.winsaveview()
