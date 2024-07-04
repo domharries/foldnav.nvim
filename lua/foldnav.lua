@@ -12,7 +12,7 @@ local M = {}
 local default_config = {
   highlight = {
     enabled = false,
-    mode = "opposite",
+    mode = "fold",
     duration_ms = 300,
   },
 }
@@ -28,22 +28,26 @@ local function hidden_norm(cmd)
   vim.cmd("noautocmd keepjumps norm! " .. cmd)
 end
 
-local highlight_id
+local mark_ns = vim.api.nvim_create_namespace "foldnav"
+local mark_id = 1
+
+vim.api.nvim_set_hl(0, "FoldnavHint", {
+  default = true, link = "CursorLine",
+})
 
 local function highlight(start_line, end_line, duration)
   local lines = {}
   for i = start_line, end_line do lines[#lines + 1] = i end
 
-  if highlight_id then
-    vim.fn.matchdelete(highlight_id)
-  end
-  highlight_id = vim.fn.matchaddpos("StatusLine", lines)
+  vim.api.nvim_buf_set_extmark(0, mark_ns, start_line - 1, 0, {
+    id = mark_id,
+    end_row = end_line,
+    hl_group = "FoldnavHint",
+    hl_eol = true,
+  })
 
   vim.defer_fn(function()
-    if highlight_id then
-      vim.fn.matchdelete(highlight_id)
-      highlight_id = nil
-    end
+    vim.api.nvim_buf_del_extmark(0, mark_ns, mark_id)
   end, duration)
 end
 
