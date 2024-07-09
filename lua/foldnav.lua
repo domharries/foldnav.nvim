@@ -1,16 +1,16 @@
 local M = {}
 
 ---@class foldnav.Config
----@field highlight foldnav.HighlightConfig
+---@field flash foldnav.FlashConfig
 
----@class foldnav.HighlightConfig
+---@class foldnav.FlashConfig
 ---@field enabled boolean
 ---@field mode "opposite" | "fold"
 ---@field duration_ms integer
 
 ---@type foldnav.Config
 local default_config = {
-  highlight = {
+  flash = {
     enabled = false,
     mode = "fold",
     duration_ms = 300,
@@ -20,6 +20,7 @@ local default_config = {
 ---@type foldnav.Config | nil
 vim.g.foldnav = vim.g.foldnav
 
+---@return foldnav.Config
 local function load_config()
   return vim.tbl_deep_extend("force", default_config, vim.g.foldnav or {})
 end
@@ -32,14 +33,11 @@ local mark_ns = vim.api.nvim_create_namespace "foldnav"
 local mark_id = 1
 local mark_timer
 
-vim.api.nvim_set_hl(0, "FoldnavHint", {
+vim.api.nvim_set_hl(0, "FoldnavFlash", {
   default = true, link = "CursorLine",
 })
 
-local function highlight(start_line, end_line, duration)
-  local lines = {}
-  for i = start_line, end_line do lines[#lines + 1] = i end
-
+local function flash_range(start_line, end_line, duration)
   -- cancel previous timer
   if mark_timer and not mark_timer:is_closing() then
     mark_timer:close()
@@ -48,7 +46,7 @@ local function highlight(start_line, end_line, duration)
   vim.api.nvim_buf_set_extmark(0, mark_ns, start_line - 1, 0, {
     id = mark_id,
     end_row = end_line,
-    hl_group = "FoldnavHint",
+    hl_group = "FoldnavFlash",
     hl_eol = true,
   })
 
@@ -88,14 +86,14 @@ local function nav(fold_loc, line_fn)
 
   local config = load_config()
 
-  if config.highlight.enabled then
-    if config.highlight.mode == "fold" then
-      highlight(fold_start, fold_end, config.highlight.duration_ms)
-    elseif config.highlight.mode == "opposite" then
+  if config.flash.enabled then
+    if config.flash.mode == "fold" then
+      flash_range(fold_start, fold_end, config.flash.duration_ms)
+    elseif config.flash.mode == "opposite" then
       if fold_loc == "start" then
-        highlight(fold_end, fold_end, config.highlight.duration_ms)
+        flash_range(fold_end, fold_end, config.flash.duration_ms)
       else
-        highlight(fold_start, fold_start, config.highlight.duration_ms)
+        flash_range(fold_start, fold_start, config.flash.duration_ms)
       end
     end
   end
