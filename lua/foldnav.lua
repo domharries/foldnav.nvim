@@ -30,6 +30,7 @@ end
 
 local mark_ns = vim.api.nvim_create_namespace "foldnav"
 local mark_id = 1
+local mark_timer
 
 vim.api.nvim_set_hl(0, "FoldnavHint", {
   default = true, link = "CursorLine",
@@ -39,6 +40,11 @@ local function highlight(start_line, end_line, duration)
   local lines = {}
   for i = start_line, end_line do lines[#lines + 1] = i end
 
+  -- cancel previous timer
+  if mark_timer and not mark_timer:is_closing() then
+    mark_timer:close()
+  end
+
   vim.api.nvim_buf_set_extmark(0, mark_ns, start_line - 1, 0, {
     id = mark_id,
     end_row = end_line,
@@ -46,7 +52,7 @@ local function highlight(start_line, end_line, duration)
     hl_eol = true,
   })
 
-  vim.defer_fn(function()
+  mark_timer = vim.defer_fn(function()
     vim.api.nvim_buf_del_extmark(0, mark_ns, mark_id)
   end, duration)
 end
