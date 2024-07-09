@@ -131,13 +131,13 @@ function M.to_prev_start()
     for i = init_line - 1, 1, -1 do
       local level = vim.fn.foldlevel(i)
       if level < lastLevel or (level == lastLevel and i == prev) then
-        vim.fn.cursor(i + 1)
+        vim.cmd(tostring(i + 1))
         return
       end
       lastLevel = level
     end
     if vim.fn.foldlevel(1) > 0 then
-      vim.fn.cursor(1)
+      vim.cmd(tostring(1))
     end
   end)
 end
