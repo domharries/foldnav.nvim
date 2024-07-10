@@ -61,7 +61,10 @@ local function nav(fold_loc, line_fn)
   local saved_view = vim.fn.winsaveview()
   local saved_pos = vim.fn.getcurpos()
 
-  line_fn()
+  for _ = 1, vim.v.count1 do
+    line_fn()
+  end
+
   local lnum = vim.fn.line "."
 
   local fold_start, fold_end
