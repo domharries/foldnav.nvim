@@ -17,8 +17,8 @@ The demo was recorded with the lazy.nvim example config shown below.
 
 ### Requirements
 
-Foldnav needs a buffer with folds. A good way to achieve this is to use
-treesitter. This can be enabled with the following Lua code:
+Foldnav requires a buffer with folds to operate. To use treesitter for
+folding, add the following Lua code to your config:
 
 ```lua
 vim.opt.foldmethod = "expr"
@@ -30,8 +30,8 @@ See [`:help
 treesitter-parsers`](https://neovim.io/doc/user/treesitter.html#_parser-files)
 to enable treesitter for more filetypes.
 
-To test if folding works, run `:set foldcolumn=auto:9`. This should show
-all the folds for your current file in the left margin (see video above).
+To test if folding works, run `:set foldcolumn=auto:9`. This shows all
+the folds for your current file in the left margin (see video above).
 
 ### Plugin Installation
 
@@ -70,8 +70,8 @@ vim.keymap.set("n", "<M-l>", function() require("foldnav").goto_end() end)
 ```
 
 These mappings are defined for normal mode, but you could also define
-them for visual and even operator pending mode by changing the first
-argument to `{"n", "x", "o"}`. See [`:help
+them for visual and operator pending mode by changing the first argument
+to `{"n", "x", "o"}`. See [`:help
 map-modes`](https://neovim.io/doc/user/map.html#_1.3-mapping-and-modes)
 for more information.
 
@@ -175,10 +175,9 @@ candidate for vertical navigation. But it doesn't allow navigating data
 structure literals or configuration languages like JSON.
 
 Happily the requirements I have for vertical navigation are well aligned
-with the requirements for deciding where to put fold markers. Neovim now
-uses treesitter for deciding where code should fold, and there is a
-high-quality collection of fold definitions for a large range of
-programming languages.
+with the requirements for deciding where to put fold markers. Neovim can
+now use treesitter for code folding, with a high-quality collection of
+fold definitions for many programming languages.
 
 So this plugin piggybacks on folds, either defined with treesitter or
 whichever other method is configured (see [`:help
