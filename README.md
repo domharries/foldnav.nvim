@@ -9,7 +9,7 @@ commands](https://neovim.io/doc/user/fold.html#%5Bz) that:
   - can highlight the fold during navigation
   - is optimised for speedy navigation with a modifier and `hjkl`
 
-_demo video_
+https://github.com/user-attachments/assets/fee86129-8b52-4337-9bb9-6eae3028cbcd
 
 The demo was recorded with the lazy.nvim example config shown below.
 
