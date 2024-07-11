@@ -99,23 +99,23 @@ local function nav(fold_loc, line_fn)
   end
 end
 
-function M.to_start()
+function M.goto_start()
   nav("start", function() hidden_norm "[z" end)
 end
 
-function M.to_end()
+function M.goto_end()
   nav("end", function() hidden_norm "]z" end)
 end
 
-function M.to_next()
+function M.goto_next()
   nav("start", function() hidden_norm "zj" end)
 end
 
-function M.to_prev_end()
+function M.goto_prev_end()
   nav("end", function() hidden_norm "zk" end)
 end
 
-function M.to_prev_start()
+function M.goto_prev_start()
   nav("start", function()
     local init_line = vim.fn.line "."
 
