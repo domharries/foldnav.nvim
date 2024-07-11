@@ -18,7 +18,7 @@ local default_config = {
 }
 
 ---@type foldnav.Config | nil
-vim.g.foldnav = vim.g.foldnav
+vim.g.foldnav = vim.g.foldnav or default_config
 
 ---@return foldnav.Config
 local function load_config()
