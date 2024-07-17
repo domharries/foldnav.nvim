@@ -29,6 +29,10 @@ local function hidden_norm(cmd)
   vim.cmd("noautocmd keepjumps norm! " .. cmd)
 end
 
+local function goto_line(lnum)
+  vim.cmd(tostring(lnum))
+end
+
 local mark_ns = vim.api.nvim_create_namespace "foldnav"
 local mark_id = 1
 local mark_timer
@@ -81,8 +85,8 @@ local function nav(fold_loc, line_fn)
 
   if saved_pos[2] == lnum then return end -- didn't move
 
-  vim.cmd(tostring(lnum))                 -- move to line
-  vim.cmd "norm! m'"                      -- update jumplist
+  goto_line(lnum)
+  vim.cmd "norm! m'" -- update jumplist
 
   local config = load_config()
 
@@ -117,29 +121,31 @@ end
 
 function M.goto_prev_start()
   nav("start", function()
+    -- escape out of closed fold
+    local closed_fold_start = vim.fn.foldclosed(".")
+    if closed_fold_start ~= -1 then
+      goto_line(closed_fold_start)
+    end
+
     local init_line = vim.fn.line "."
 
-    -- Detect consecutive sibling folds
-    hidden_norm "zk"
-    local prev = vim.fn.line "."
-
-    local closed_fold_start = vim.fn.foldclosed(init_line)
-    if closed_fold_start ~= -1 then
-      init_line = closed_fold_start
-    end
-
-    local lastLevel = -1
-    for i = init_line - 1, 1, -1 do
-      local level = vim.fn.foldlevel(i)
-      if level < lastLevel or (level == lastLevel and i == prev) then
-        vim.cmd(tostring(i + 1))
+    hidden_norm "[z"            -- try to go up the hierarchy
+    local line = vim.fn.line(".")
+    if line == init_line then   -- didn't move, we are at the top level
+      hidden_norm "zk[z"        -- so jump back to the previous hierarchy
+      line = vim.fn.line(".")
+      if line == init_line then -- there were no earlier folds
         return
       end
-      lastLevel = level
     end
-    if vim.fn.foldlevel(1) > 0 then
-      vim.cmd(tostring(1))
+
+    local nearest
+    while line < init_line and line ~= nearest do
+      nearest = line
+      hidden_norm "zj"
+      line = vim.fn.line(".")
     end
+    goto_line(nearest)
   end)
 end
 
