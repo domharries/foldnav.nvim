@@ -86,7 +86,7 @@ for _, test in ipairs(cases) do
 end
 
 if all_passed then
-  print "All tests passed!"
+  print "All tests passed!\n"
 else
   os.exit(1)
 end
