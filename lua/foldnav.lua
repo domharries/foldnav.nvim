@@ -122,6 +122,7 @@ end
 function M.goto_prev_start()
   nav("start", function()
     -- escape out of closed fold
+    ---@diagnostic disable-next-line: param-type-mismatch
     local closed_fold_start = vim.fn.foldclosed(".")
     if closed_fold_start ~= -1 then
       goto_line(closed_fold_start)
