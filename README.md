@@ -1,13 +1,17 @@
 # foldnav.nvim
 
-Wrapper around vim's [fold navigation
-commands](https://neovim.io/doc/user/fold.html#%5Bz) that:
+## Overview
+
+Wrapper around vim's fold navigation commands
+([\[z](https://neovim.io/doc/user/fold.html#%5Bz) etc) that:
 
   - maintains the cursor column
   - adds a `goto_prev_start()` mapping to move to the most recent start of
     a fold
   - can highlight the fold during navigation
   - is optimised for speedy navigation with a modifier and `hjkl`
+
+### Demo video
 
 https://github.com/user-attachments/assets/b2d0a139-8c10-4d58-9e28-6291d45ff922
 
@@ -26,8 +30,8 @@ vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
 vim.opt.foldlevelstart = 99 -- load buffers with folds open
 ```
 
-See [`:help
-treesitter-parsers`](https://neovim.io/doc/user/treesitter.html#_parser-files)
+See
+[treesitter-parsers](https://neovim.io/doc/user/treesitter.html#_parser-files)
 to enable treesitter for more filetypes.
 
 To test if folding works, run `:set foldcolumn=auto:9`. This shows all
@@ -71,11 +75,11 @@ vim.keymap.set("n", "<M-l>", function() require("foldnav").goto_end() end)
 
 These mappings are defined for normal mode, but you could also define
 them for visual and operator pending mode by changing the first argument
-to `{"n", "x", "o"}`. See [`:help
-map-modes`](https://neovim.io/doc/user/map.html#_1.3-mapping-and-modes)
+to `{"n", "x", "o"}`. See
+[:map-modes](https://neovim.io/doc/user/map.html#_1.3-mapping-and-modes)
 for more information.
 
-**Hint:** If you want to configure the plugin to go to the start or end
+Hint: If you want to configure the plugin to go to the start or end
 of the line when navigating, you can call `^` or `$` at the end of the
 mapping, e.g.
 
@@ -99,7 +103,7 @@ equivalent vim commands:
 | `goto_prev_end()`   | `zk`   | End of the previous fold                  |
 | `goto_end()`        | `]z`   | End of the enclosing fold                 |
 
-### Choosing between `goto_prev_start()` and `goto_prev_end()`
+### Mapping mod+k
 
 Fold navigation maps quite nicely onto the standard vim `hjkl` movement
 keys, but there are two options for mapping <kbd>Mod</kbd>+<kbd>k</kbd>.
@@ -154,17 +158,18 @@ Individual parameters can be changed for the current session by using
 :let g:foldnav.flash.mode = "opposite"
 ```
 
-**Note:** directly setting individual values does [not work in
-Lua](https://neovim.io/doc/user/lua.html#lua-vim-variables).
+Note: directly setting individual values does not work in Lua, see
+[lua-vim-variables](https://neovim.io/doc/user/lua.html#lua-vim-variables).
 
 The highlight group used for the flash is `FoldnavFlash`. By default it
 links to the `CursorLine` highlight group but can be customised using
-`:highlight` or `vim.api.nvim_set_hl()`.
+[:highlight](https://neovim.io/doc/user/syntax.html#_13.-highlight-command)
+or [nvim_set_hl()](https://neovim.io/doc/user/api.html#nvim_set_hl()).
 
 ## Motivation
 
 I've never been happy with vertical motion in vim. Typing line numbers
-or counts for `j`/`k` actions has always seemed clunky.
+or counts for `j` and `k` actions has always seemed clunky.
 
 Now that Neovim has treesitter support, there is a new level of semantic
 data that can be used for navigation. However, choosing appropriate
@@ -180,8 +185,7 @@ now use treesitter for code folding, with a high-quality collection of
 fold definitions for many programming languages.
 
 So this plugin piggybacks on folds, either defined with treesitter or
-whichever other method is configured (see [`:help
-'foldmethod'`](https://neovim.io/doc/user/options.html#'foldmethod')).
+whichever other method is configured (see ['foldmethod'](https://neovim.io/doc/user/options.html#'foldmethod')).
 
 ## Alternatives
 
