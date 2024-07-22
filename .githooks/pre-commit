@@ -1,0 +1,12 @@
+#!/bin/bash
+set -eo pipefail
+
+if git diff --staged --name-only | grep -q README.md; then
+  "${PANVIMDOC_DIR:?}/panvimdoc.pre-commit.sh" \
+    --project-name foldnav \
+    --input-file README.md \
+    --description "Fast vertical navigation using folds" \
+    --shift-heading-level-by -1
+fi
+
+./tests.lua

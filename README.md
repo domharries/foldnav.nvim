@@ -6,8 +6,8 @@ Wrapper around vim's fold navigation commands
 ([\[z](https://neovim.io/doc/user/fold.html#%5Bz) etc) that:
 
   - maintains the cursor column
-  - adds a `goto_prev_start()` mapping to move to the most recent start of
-    a fold
+  - adds a `goto_prev_start()` mapping to move to the most recent start
+    of a fold
   - can highlight the fold during navigation
   - is optimised for speedy navigation with a modifier and `hjkl`
 
