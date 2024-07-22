@@ -2,14 +2,32 @@
 
 ## Overview
 
-Wrapper around vim's fold navigation commands
-([\[z](https://neovim.io/doc/user/fold.html#%5Bz) etc) that:
+Vim's vertical navigation commands are limited, forcing users to rely on
+methods like manual line counting (`5j`) to reach their desired
+location. We need a way to navigate based on the buffer's semantic
+structure, using meaningful points of reference.
 
-  - maintains the cursor column
-  - adds a `goto_prev_start()` mapping to move to the most recent start
-    of a fold
-  - can highlight the fold during navigation
-  - is optimised for speedy navigation with a modifier and `hjkl`
+Fortunately, this problem is already solved in another area: code
+folding. Neovim's Treesitter support provides a high-quality repository
+of queries that define folds based on programming language semantics,
+which can also power vertical navigation.
+
+Vim provides some built in commands for navigating folds:
+[\[z](https://neovim.io/doc/user/fold.html#%5Bz),
+[z\]](https://neovim.io/doc/user/fold.html#%5Dz),
+[zj](https://neovim.io/doc/user/fold.html#zj) and
+[zk](https://neovim.io/doc/user/fold.html#zk). However, these have some
+shortcomings:
+
+  - The `zk` keybinding moves to the end of the previous fold rather
+    than the most recent start of a fold, which is unintuitive
+  - The cursor is moved to the very start of the line (unlike other
+    vertical navigation commands)
+  - The keybindings are awkward which makes it difficult to repeat
+    motions or compose multiple motions together
+  - There is no visual feedback of the fold structure while navigating
+
+This plugins fixes these shortcomings.
 
 ### Demo video
 
@@ -37,7 +55,7 @@ to enable treesitter for more filetypes.
 To test if folding works, run `:set foldcolumn=auto:9`. This shows all
 the folds for your current file in the left margin (see video above).
 
-### Plugin Installation
+### Plugin installation
 
 Example using [lazy.nvim](https://github.com/folke/lazy.nvim) to
 install, enable highlighting, and map the <kbd>Ctrl</kbd> modifier:
@@ -79,18 +97,7 @@ to `{"n", "x", "o"}`. See
 [:map-modes](https://neovim.io/doc/user/map.html#_1.3-mapping-and-modes)
 for more information.
 
-Hint: If you want to configure the plugin to go to the start or end
-of the line when navigating, you can call `^` or `$` at the end of the
-mapping, e.g.
-
-```lua
-vim.keymap.set("n", "<C-h>", function()
-  require("foldnav").goto_start()
-  vim.cmd.normal("^")
-end)
-```
-
-## Actions
+## Motions
 
 The movements that this plugin provides are shown below, with their
 equivalent vim commands:
@@ -119,7 +126,7 @@ Pros for `goto_prev_end()`:
   - Matches the built in vim movements - it's easy to map a few keys on
     vanilla vim to get functionality that is mostly equivalent. See
     [Alternatives](#alternatives) below.
-  - Can use <kbd>Mod</kbd>+<kbd>jljljl</kbd> and
+  - Can use <kbd>Mod</kbd>+<kbd>ljljlj</kbd> and
     <kbd>Mod</kbd>+<kbd>khkhkh</kbd> to go up and down at a constant
     level of nesting (useful for JSON)
   - To reverse a <kbd>Mod</kbd>+<kbd>j</kbd> navigation, you can use
@@ -127,6 +134,38 @@ Pros for `goto_prev_end()`:
 
 Of course it is perfectly possible to map both functions with different
 keys.
+
+### Cursor column
+
+To configure the plugin to go to the start or end of the line when
+navigating, you can call `^` or `$` at the end of the mapping, e.g.
+
+```lua
+vim.keymap.set("n", "<C-h>", function()
+  require("foldnav").goto_start()
+  vim.cmd.normal("^")
+end)
+```
+
+### Constant fold level
+
+The bindings shown so far will navigate across multiple fold levels. The
+following mappings will navigate to the next and previous fold on the
+same level where possible:
+
+```lua
+vim.keymap.set("n", "<M-n>", function()
+  local foldnav = require("foldnav")
+  foldnav.goto_end()
+  foldnav.goto_next()
+end)
+
+vim.keymap.set("n", "<M-p>", function()
+  local foldnav = require("foldnav")
+  foldnav.goto_prev_end()
+  foldnav.goto_start()
+end)
+```
 
 ## Configuration
 
@@ -165,27 +204,6 @@ The highlight group used for the flash is `FoldnavFlash`. By default it
 links to the `CursorLine` highlight group but can be customised using
 [:highlight](https://neovim.io/doc/user/syntax.html#_13.-highlight-command)
 or [nvim_set_hl()](https://neovim.io/doc/user/api.html#nvim_set_hl()).
-
-## Motivation
-
-I've never been happy with vertical motion in vim. Typing line numbers
-or counts for `j` and `k` actions has always seemed clunky.
-
-Now that Neovim has treesitter support, there is a new level of semantic
-data that can be used for navigation. However, choosing appropriate
-treesitter queries is not so easy. The
-[nvim-treesitter-textobjects](https://github.com/nvim-treesitter/nvim-treesitter-textobjects)
-project defines a lot of useful queries, and `@block.outer` is a good
-candidate for vertical navigation. But it doesn't allow navigating data
-structure literals or configuration languages like JSON.
-
-Happily the requirements I have for vertical navigation are well aligned
-with the requirements for deciding where to put fold markers. Neovim can
-now use treesitter for code folding, with a high-quality collection of
-fold definitions for many programming languages.
-
-So this plugin piggybacks on folds, either defined with treesitter or
-whichever other method is configured (see ['foldmethod'](https://neovim.io/doc/user/options.html#'foldmethod')).
 
 ## Alternatives
 

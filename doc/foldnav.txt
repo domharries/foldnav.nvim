@@ -7,23 +7,39 @@ Table of Contents                                  *foldnav-table-of-contents*
   - Demo video                                   |foldnav-overview-demo-video|
 2. Setup                                                       |foldnav-setup|
   - Requirements                                  |foldnav-setup-requirements|
-  - Plugin Installation                    |foldnav-setup-plugin-installation|
-3. Actions                                                   |foldnav-actions|
-  - Mapping mod+k                              |foldnav-actions-mapping-mod+k|
+  - Plugin installation                    |foldnav-setup-plugin-installation|
+3. Motions                                                   |foldnav-motions|
+  - Mapping mod+k                              |foldnav-motions-mapping-mod+k|
+  - Cursor column                              |foldnav-motions-cursor-column|
+  - Constant fold level                  |foldnav-motions-constant-fold-level|
 4. Configuration                                       |foldnav-configuration|
-5. Motivation                                             |foldnav-motivation|
-6. Alternatives                                         |foldnav-alternatives|
+5. Alternatives                                         |foldnav-alternatives|
 
 ==============================================================================
 1. Overview                                                 *foldnav-overview*
 
-Wrapper around vim’s fold navigation commands (|[z| etc) that:
+Vim’s vertical navigation commands are limited, forcing users to rely on
+methods like manual line counting (`5j`) to reach their desired location. We
+need a way to navigate based on the buffer’s semantic structure, using
+meaningful points of reference.
 
-- maintains the cursor column
-- adds a `goto_prev_start()` mapping to move to the most recent start
-    of a fold
-- can highlight the fold during navigation
-- is optimised for speedy navigation with a modifier and `hjkl`
+Fortunately, this problem is already solved in another area: code folding.
+Neovim’s Treesitter support provides a high-quality repository of queries
+that define folds based on programming language semantics, which can also power
+vertical navigation.
+
+Vim provides some built in commands for navigating folds: |[z|, |z]|, |zj| and
+|zk|. However, these have some shortcomings:
+
+- The `zk` keybinding moves to the end of the previous fold rather
+    than the most recent start of a fold, which is unintuitive
+- The cursor is moved to the very start of the line (unlike other
+    vertical navigation commands)
+- The keybindings are awkward which makes it difficult to repeat
+    motions or compose multiple motions together
+- There is no visual feedback of the fold structure while navigating
+
+This plugins fixes these shortcomings.
 
 
 DEMO VIDEO                                       *foldnav-overview-demo-video*
@@ -95,19 +111,9 @@ These mappings are defined for normal mode, but you could also define them for
 visual and operator pending mode by changing the first argument to `{"n", "x",
 "o"}`. See |:map-modes| for more information.
 
-Hint: If you want to configure the plugin to go to the start or end of the line
-when navigating, you can call `^` or `$` at the end of the mapping, e.g.
-
->lua
-    vim.keymap.set("n", "<C-h>", function()
-      require("foldnav").goto_start()
-      vim.cmd.normal("^")
-    end)
-<
-
 
 ==============================================================================
-3. Actions                                                   *foldnav-actions*
+3. Motions                                                   *foldnav-motions*
 
 The movements that this plugin provides are shown below, with their equivalent
 vim commands:
@@ -126,7 +132,7 @@ vim commands:
   goto_end()           ]z     End of the enclosing fold
   ------------------------------------------------------------------------
 
-MAPPING MOD+K                                  *foldnav-actions-mapping-mod+k*
+MAPPING MOD+K                                  *foldnav-motions-mapping-mod+k*
 
 Fold navigation maps quite nicely onto the standard vim `hjkl` movement keys,
 but there are two options for mapping Mod+k.
@@ -142,13 +148,47 @@ Pros for `goto_prev_end()`:
 - Matches the built in vim movements - it’s easy to map a few keys on
     vanilla vim to get functionality that is mostly equivalent. See
     |foldnav-alternatives| below.
-- Can use Mod+jljljl and
+- Can use Mod+ljljlj and
     Mod+khkhkh to go up and down at a constant
     level of nesting (useful for JSON)
 - To reverse a Mod+j navigation, you can use
     Ctrl+o to navigate backwards in the jumplist.
 
 Of course it is perfectly possible to map both functions with different keys.
+
+
+CURSOR COLUMN                                  *foldnav-motions-cursor-column*
+
+To configure the plugin to go to the start or end of the line when navigating,
+you can call `^` or `$` at the end of the mapping, e.g.
+
+>lua
+    vim.keymap.set("n", "<C-h>", function()
+      require("foldnav").goto_start()
+      vim.cmd.normal("^")
+    end)
+<
+
+
+CONSTANT FOLD LEVEL                      *foldnav-motions-constant-fold-level*
+
+The bindings shown so far will navigate across multiple fold levels. The
+following mappings will navigate to the next and previous fold on the same
+level where possible:
+
+>lua
+    vim.keymap.set("n", "<M-n>", function()
+      local foldnav = require("foldnav")
+      foldnav.goto_end()
+      foldnav.goto_next()
+    end)
+    
+    vim.keymap.set("n", "<M-p>", function()
+      local foldnav = require("foldnav")
+      foldnav.goto_prev_end()
+      foldnav.goto_start()
+    end)
+<
 
 
 ==============================================================================
@@ -195,30 +235,7 @@ to the `CursorLine` highlight group but can be customised using |:highlight| or
 
 
 ==============================================================================
-5. Motivation                                             *foldnav-motivation*
-
-I’ve never been happy with vertical motion in vim. Typing line numbers or
-counts for `j` and `k` actions has always seemed clunky.
-
-Now that Neovim has treesitter support, there is a new level of semantic data
-that can be used for navigation. However, choosing appropriate treesitter
-queries is not so easy. The nvim-treesitter-textobjects
-<https://github.com/nvim-treesitter/nvim-treesitter-textobjects> project
-defines a lot of useful queries, and `@block.outer` is a good candidate for
-vertical navigation. But it doesn’t allow navigating data structure literals
-or configuration languages like JSON.
-
-Happily the requirements I have for vertical navigation are well aligned with
-the requirements for deciding where to put fold markers. Neovim can now use
-treesitter for code folding, with a high-quality collection of fold definitions
-for many programming languages.
-
-So this plugin piggybacks on folds, either defined with treesitter or whichever
-other method is configured (see |'foldmethod'|).
-
-
-==============================================================================
-6. Alternatives                                         *foldnav-alternatives*
+5. Alternatives                                         *foldnav-alternatives*
 
 Excluding the `goto_prev_start()` function, most of what this plugin does can
 be approximated with the following Lua code (Ctrl modifier shown):
