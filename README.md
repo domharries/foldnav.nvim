@@ -2,10 +2,10 @@
 
 ## Overview
 
-Vim's vertical navigation commands are limited, forcing users to rely on
-methods like manual line counting (`5j`) to reach their desired
-location. We need a way to navigate based on the buffer's semantic
-structure, using meaningful points of reference.
+Vim's vertical navigation commands can be limiting, and users often rely
+on methods like manual line counting (`5j`) to reach their desired
+location. It would be useful to have a way to navigate based on the
+semantic structure of a buffer, with meaningful points of reference.
 
 Fortunately, this problem is already solved in another area: code
 folding. Neovim's Treesitter support provides a high-quality repository
